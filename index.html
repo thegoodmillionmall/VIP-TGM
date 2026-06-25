@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>THE GOOD MILLION CO., LTD. | VIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo-card">
+        <img src="assets/the-good-million-logo.png" alt="THE GOOD MILLION CO., LTD." />
+      </div>
+      <button class="admin-gear" id="admin-gear" type="button" aria-label="เข้าสู่หลังบ้าน">⚙</button>
+    </header>
+
+    <main class="app">
+      <section class="view active" id="form-view">
+        <section class="hero">
+          <div class="hero-kicker">
+            <span>THE GOOD MILLION CO., LTD.</span>
+            <span>VIP MEMBER</span>
+          </div>
+          <h1>ร่วมเป็น VIP The Good Million รับสินค้าใหม่ก่อนใคร</h1>
+          <p>กรอกข้อมูลเพื่อให้ทีมแอดมินตรวจสอบสิทธิ์และดูแลการจัดส่งสินค้าให้เหมาะกับคุณโดยเฉพาะ</p>
+          <div class="hero-benefits" aria-label="VIP benefits">
+            <span>สินค้าใหม่ก่อนใคร</span>
+            <span>ทีมแอดมินดูแล</span>
+            <span>เติมของต่อเนื่อง</span>
+          </div>
+        </section>
+
+        <form class="panel vip-form" id="vip-form">
+          <div class="form-grid">
+            <label class="field">
+              <span>ชื่อ-นามสกุล <b>*</b></span>
+              <input name="customerName" autocomplete="name" required />
+            </label>
+
+            <label class="field">
+              <span>เบอร์โทร <b>*</b></span>
+              <input name="phone" inputmode="tel" autocomplete="tel" required />
+            </label>
+
+            <label class="field">
+              <span>ไอดีไลน์ <b>*</b></span>
+              <input name="lineId" required />
+            </label>
+
+            <label class="field">
+              <span>Link ช่อง TikTok <b>*</b></span>
+              <input name="tiktokLink" type="url" placeholder="https://..." required />
+            </label>
+
+            <label class="field">
+              <span>ชื่อ Facebook <b>*</b></span>
+              <input name="facebookName" required />
+            </label>
+
+            <label class="field">
+              <span>หมายเหตุ</span>
+              <input name="customerNote" placeholder="เช่น ช่วงเวลาที่สะดวกรับสินค้า" />
+            </label>
+
+            <label class="field span-2">
+              <span>ที่อยู่จัดส่งสินค้า <b>*</b></span>
+              <textarea name="address" rows="4" required></textarea>
+            </label>
+          </div>
+
+          <button class="primary-button wide-button" type="submit">ส่งข้อมูล VIP</button>
+          <p id="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="view" id="admin-view">
+        <div class="admin-header">
+          <div>
+            <p class="eyebrow">Back Office</p>
+            <h2>หลังบ้านรายการ VIP</h2>
+          </div>
+          <div class="admin-tabs" aria-label="Admin sections">
+            <button class="admin-tab active" data-admin-view="records" type="button">รายการ</button>
+            <button class="admin-tab" data-admin-view="settings" type="button">ตั้งค่า</button>
+            <button class="admin-tab logout" id="logout-admin" type="button">ออก</button>
+          </div>
+        </div>
+
+        <section class="admin-section active" id="records-section">
+          <div class="stats-grid" id="stats-grid"></div>
+
+          <div class="toolbar">
+            <div class="segmented" role="tablist" aria-label="ตัวกรองสถานะ">
+              <button class="active" data-filter="all" type="button">ทั้งหมด</button>
+              <button data-filter="pending" type="button">รออนุมัติ</button>
+              <button data-filter="approved" type="button">รอจัดส่ง</button>
+              <button data-filter="done" type="button">เสร็จสิ้น</button>
+            </div>
+            <button class="secondary-button" id="export-csv" type="button">Export CSV</button>
+          </div>
+
+          <label class="field search-box">
+            <span>ค้นหา</span>
+            <input id="search-input" placeholder="ชื่อ เบอร์ ไลน์ Facebook หรือสินค้า" />
+          </label>
+
+          <div class="date-filter panel">
+            <label class="field">
+              <span>วันที่กรอก ตั้งแต่</span>
+              <input id="date-from" type="date" />
+            </label>
+            <label class="field">
+              <span>ถึงวันที่</span>
+              <input id="date-to" type="date" />
+            </label>
+            <button class="secondary-button" id="clear-date-filter" type="button">ล้างวันที่</button>
+          </div>
+
+          <div class="product-filter panel">
+            <div class="filter-title">
+              <span>แสดงเฉพาะสินค้า</span>
+              <button class="secondary-button" id="clear-product-filter" type="button">ล้างสินค้า</button>
+            </div>
+            <div class="product-filter-options" id="product-filter-options"></div>
+          </div>
+
+          <div class="records-list" id="records-list"></div>
+        </section>
+
+        <section class="admin-section" id="settings-section">
+          <section class="panel settings-panel">
+            <div class="section-title">
+              <div>
+                <h2>สินค้า</h2>
+                <p>สินค้าในรายการนี้จะให้แอดมินเลือกเพิ่มให้ลูกค้า</p>
+              </div>
+            </div>
+            <form class="inline-form" id="product-form">
+              <input name="productName" placeholder="ชื่อสินค้า" required />
+              <input name="productCode" placeholder="รหัส/รุ่น" />
+              <button class="primary-button" type="submit">เพิ่ม</button>
+            </form>
+            <div class="settings-list" id="settings-products"></div>
+          </section>
+
+          <section class="panel settings-panel">
+            <div class="section-title">
+              <div>
+                <h2>ผู้ใช้หลังบ้าน</h2>
+                <p>เตรียมรายชื่อทีมสำหรับเชื่อมระบบ auth ใน Supabase</p>
+              </div>
+            </div>
+            <form class="inline-form user-form" id="user-form">
+              <input name="displayName" placeholder="ชื่อผู้ใช้" required />
+              <input name="username" placeholder="User สำหรับ login" required />
+              <input name="password" type="password" placeholder="รหัสผ่าน" required />
+              <button class="primary-button" type="submit">เพิ่ม</button>
+            </form>
+            <div class="settings-list" id="settings-users"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <dialog class="login-dialog" id="login-dialog">
+      <form id="login-form" method="dialog">
+        <div class="dialog-head">
+          <h2>เข้าสู่หลังบ้าน</h2>
+          <button class="icon-button" id="close-login" type="button" aria-label="ปิด">×</button>
+        </div>
+        <label class="field">
+          <span>User</span>
+          <input id="admin-username" type="text" autocomplete="username" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input id="admin-password" type="password" autocomplete="current-password" required />
+        </label>
+        <button class="primary-button wide-button" type="submit">เข้าใช้งาน</button>
+        <p id="login-message" role="alert"></p>
+      </form>
+    </dialog>
+
+    <dialog class="success-dialog" id="success-dialog">
+      <div class="success-content">
+        <div class="success-mark">✓</div>
+        <h2>บันทึกสำเร็จ</h2>
+        <p>ขอบคุณที่ลงทะเบียน VIP ทีมแอดมินจะตรวจสอบข้อมูลและติดต่อกลับ</p>
+        <button class="primary-button wide-button" id="close-success" type="button">ตกลง</button>
+      </div>
+    </dialog>
+
+    <dialog class="edit-dialog" id="edit-dialog">
+      <form id="edit-request-form">
+        <div class="dialog-head">
+          <h2>ข้อมูล VIP</h2>
+          <button class="icon-button" id="close-edit" type="button" aria-label="ปิด">×</button>
+        </div>
+        <input name="requestId" type="hidden" />
+        <div class="edit-grid">
+          <label class="field">
+            <span>ชื่อ-นามสกุล</span>
+            <input name="customerName" required />
+          </label>
+          <label class="field">
+            <span>เบอร์โทร</span>
+            <input name="phone" inputmode="tel" required />
+          </label>
+          <label class="field">
+            <span>ไอดีไลน์</span>
+            <input name="lineId" required />
+          </label>
+          <label class="field">
+            <span>ชื่อ Facebook</span>
+            <input name="facebookName" required />
+          </label>
+          <label class="field span-2">
+            <span>Link ช่อง TikTok</span>
+            <input name="tiktokLink" type="url" required />
+          </label>
+          <label class="field span-2">
+            <span>ที่อยู่จัดส่งสินค้า</span>
+            <textarea name="address" rows="3" required></textarea>
+          </label>
+          <label class="field">
+            <span>สถานะ</span>
+            <select name="status">
+              <option value="pending">รออนุมัติ</option>
+              <option value="approved">รอจัดส่ง</option>
+              <option value="rejected">เสร็จสิ้น - ไม่อนุมัติ</option>
+              <option value="shipped">เสร็จสิ้น - จัดส่งแล้ว</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>จำนวนการส่ง</span>
+            <input name="shippedCount" type="number" min="0" />
+          </label>
+          <label class="field span-2">
+            <span>หมายเหตุ</span>
+            <input name="customerNote" />
+          </label>
+        </div>
+        <button class="primary-button wide-button" type="submit">บันทึกการแก้ไข</button>
+      </form>
+    </dialog>
+
+    <template id="assign-product-template">
+      <form class="assign-product-form">
+        <select name="productId" required></select>
+        <input name="quantity" type="number" min="1" value="1" required />
+        <input name="itemNote" placeholder="หมายเหตุสินค้า" />
+        <button class="primary-button" type="submit">เพิ่มสินค้า</button>
+      </form>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
