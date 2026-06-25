@@ -759,21 +759,56 @@ function renderProductFilters() {
   });
 }
 
-function exportCsv() {
-  const header = ["id", "status", "customer_name", "phone", "line_id", "facebook", "tiktok", "address", "products", "shipped_count", "submitted_at"];
-  const rows = getFilteredRequests().map((request) => [
-    request.id,
-    request.status,
-    request.customerName,
-    request.phone,
-    request.lineId,
-    request.facebookName,
-    request.tiktokLink,
-    request.address,
-    request.items.map((item) => `${item.productName} x ${item.quantity}`).join(" | "),
-    request.shippedCount,
-    request.submittedAt
-  ]);
+function exportExcel() {
+  const exportRows = getFilteredRequests().map((request) => ({
+    "รหัสรายการ": request.id,
+    "สถานะ": statusLabel[request.status] || request.status,
+    "รายละเอียดสถานะ": statusSubLabel[request.status] || "",
+    "ชื่อ-นามสกุล": request.customerName,
+    "เบอร์โทร": request.phone,
+    "ไอดีไลน์": request.lineId,
+    "Facebook": request.facebookName,
+    "TikTok": request.tiktokLink,
+    "ที่อยู่จัดส่ง": request.address,
+    "สินค้า": request.items.map((item) => `${item.productName} x ${item.quantity}${item.note ? ` (${item.note})` : ""}`).join(" | "),
+    "จำนวนรายการสินค้า": request.items.length,
+    "จำนวนการส่ง": request.shippedCount,
+    "หมายเหตุ": request.customerNote || "",
+    "วันที่กรอก": formatDateTimeForExport(request.submittedAt),
+    "อัปเดตล่าสุด": formatDateTimeForExport(request.updatedAt)
+  }));
+
+  if (window.XLSX) {
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    worksheet["!cols"] = [
+      { wch: 24 },
+      { wch: 14 },
+      { wch: 26 },
+      { wch: 24 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 32 },
+      { wch: 42 },
+      { wch: 48 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 22 },
+      { wch: 22 }
+    ];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "VIP Requests");
+    XLSX.writeFile(workbook, `the-good-million-vip-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    return;
+  }
+
+  exportCsvFallback(exportRows);
+}
+
+function exportCsvFallback(exportRows) {
+  const header = Object.keys(exportRows[0] || { "ข้อมูล": "" });
+  const rows = exportRows.map((row) => header.map((key) => row[key] ?? ""));
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -786,6 +821,11 @@ function exportCsv() {
 
 function csvCell(value) {
   return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function formatDateTimeForExport(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 function linkOrText(value) {
@@ -821,7 +861,7 @@ function bindEvents() {
   $("#vip-form").addEventListener("submit", handleVipSubmit);
   $("#product-form").addEventListener("submit", handleProductSubmit);
   $("#user-form").addEventListener("submit", handleUserSubmit);
-  $("#export-csv").addEventListener("click", exportCsv);
+  $("#export-excel").addEventListener("click", exportExcel);
   $("#search-input").addEventListener("input", renderRecords);
   $("#date-from").addEventListener("change", renderRecords);
   $("#date-to").addEventListener("change", renderRecords);
