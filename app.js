@@ -25,60 +25,7 @@ const defaultState = {
       active: true
     }
   ],
-  requests: [
-    {
-      id: "vip-demo-1",
-      customerName: "คุณมินตรา ทดสอบ",
-      phone: "0812345678",
-      address: "88/8 ซอยตัวอย่าง แขวงบางนา เขตบางนา กรุงเทพฯ 10260",
-      lineId: "mint.vip",
-      tiktokLink: "https://www.tiktok.com/@mintvip",
-      facebookName: "Mintra VIP",
-      customerNote: "สะดวกรับช่วงบ่าย",
-      status: "pending",
-      shippedCount: 0,
-      items: [
-        { id: "item-demo-1", productId: "p-serum", productName: "Glow Serum", quantity: 2, note: "รอบทดลอง" }
-      ],
-      submittedAt: daysAgo(1),
-      updatedAt: daysAgo(1)
-    },
-    {
-      id: "vip-demo-2",
-      customerName: "คุณณัฐพล รีวิว",
-      phone: "0895552244",
-      address: "55 ถนนรีวิว ตำบลตลาด อำเภอเมือง เชียงใหม่ 50000",
-      lineId: "nut.review",
-      tiktokLink: "https://www.tiktok.com/@nutreview",
-      facebookName: "Nut Review",
-      customerNote: "ขอสินค้าใช้ทำคอนเทนต์",
-      status: "approved",
-      shippedCount: 0,
-      items: [
-        { id: "item-demo-2", productId: "p-skincare", productName: "The Good Million Skincare Set", quantity: 1, note: "คอนเทนต์หลัก" },
-        { id: "item-demo-3", productId: "p-new", productName: "สินค้าใหม่รอบ VIP", quantity: 1, note: "เปิดตัว" }
-      ],
-      submittedAt: daysAgo(4),
-      updatedAt: daysAgo(3)
-    },
-    {
-      id: "vip-demo-3",
-      customerName: "คุณแพรวา ไลฟ์สด",
-      phone: "0861117788",
-      address: "12/4 หมู่บ้านตัวอย่าง อำเภอเมือง ขอนแก่น 40000",
-      lineId: "praewa.live",
-      tiktokLink: "https://www.tiktok.com/@praewalive",
-      facebookName: "Praewa Live",
-      customerNote: "มีไลฟ์วันศุกร์",
-      status: "shipped",
-      shippedCount: 2,
-      items: [
-        { id: "item-demo-4", productId: "p-serum", productName: "Glow Serum", quantity: 3, note: "เติมของ" }
-      ],
-      submittedAt: daysAgo(9),
-      updatedAt: daysAgo(2)
-    }
-  ]
+  requests: []
 };
 
 let state = loadState();
@@ -121,13 +68,12 @@ function normalizeState(nextState) {
     password: user.password || (index === 0 ? DEFAULT_ADMIN_PASSWORD : ""),
     email: user.email || ""
   }));
-  nextState.requests = (nextState.requests || []).map((request) => ({
-    ...request,
-    items: request.items || []
-  }));
-  if (!nextState.requests.some((request) => request.id.startsWith("vip-demo-"))) {
-    nextState.requests = [...structuredClone(defaultState.requests), ...nextState.requests];
-  }
+  nextState.requests = (nextState.requests || [])
+    .filter((request) => !String(request.id || "").startsWith("vip-demo-"))
+    .map((request) => ({
+      ...request,
+      items: (request.items || []).filter((item) => !String(item.id || "").startsWith("item-demo-"))
+    }));
   return nextState;
 }
 
@@ -158,11 +104,20 @@ async function initSupabaseState() {
       await syncStateToSupabase();
     }
     renderAll();
+    cleanupRemoteDemoData();
   } catch (error) {
     console.warn("Supabase load failed", error);
   } finally {
     isRemoteLoading = false;
   }
+}
+
+function cleanupRemoteDemoData() {
+  if (!supabaseClient) return;
+  Promise.all([
+    supabaseClient.from("vip_request_items").delete().like("id", "item-demo-%"),
+    supabaseClient.from("vip_requests").delete().like("id", "vip-demo-%")
+  ]).catch((error) => console.warn("Supabase demo cleanup failed", error));
 }
 
 async function loadStateFromSupabase() {
